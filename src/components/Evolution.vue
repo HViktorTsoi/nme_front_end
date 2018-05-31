@@ -47,48 +47,47 @@
         </el-row>
       </el-card>
     </el-row>
-    <el-row :gutter="6" class="mt-10">
-      <el-col :span="12">
-        <el-card>
-          <div slot="header" class="clearfix">
-            <span>
-              <i class="el-icon-share"></i> 度值分布</span>
-          </div>
-        </el-card>
-      </el-col>
+    <el-row class="mt-10">
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span>
+            <i class="el-icon-share"></i> 度值分布</span>
+        </div>
+        <el-col :span="8">
+          <Chart :dist="networkTopoData.dist.degree.all" :title="'度值'" :node-style="{color:'#F00',symbol:'diamond'}" />
+        </el-col>
+        <el-col :span="8">
+          <Chart :dist="networkTopoData.dist.degree.out" :title="'出度'" :node-style="{color:'#050',symbol:'rect'}" />
+        </el-col>
+        <el-col :span="8">
+          <Chart :dist="networkTopoData.dist.degree.in" :title="'入度'" :node-style="{color:'#00F',symbol:'circle'}" />
+        </el-col>
+      </el-card>
+    </el-row>
+    <el-row class="mt-10">
+      <el-card>
+        <div slot="header" class="clearfix">
+          <span>
+            <i class="el-icon-share"></i> 网络异质性</span>
+        </div>
+        <el-col :span="8">
+          <Chart :dist="networkTopoData.dist.gini.all" :is-gini="true" :title="'综合洛伦兹曲线'" :node-style="{color:'#CC0033',symbol:'circle',symbolSize:5}" />
+        </el-col>
+        <el-col :span="8">
+          <Chart :dist="networkTopoData.dist.gini.in" :is-gini="true" :title="'入度值-基尼系数'" :node-style="{color:'#333333',symbol:'circle',symbolSize:5}" />
+        </el-col>
+        <el-col :span="8">
+          <Chart :dist="networkTopoData.dist.gini.out" :is-gini="true" :title="'出度值-基尼系数'" :node-style="{color:'#CCCC00',symbol:'circle',symbolSize:5}" />
+        </el-col>
+      </el-card>
+    </el-row>
+    <el-row class="mt-10">
       <el-col :span="12">
         <el-card>
           <div slot="header" class="clearfix">
             <span>
               <i class="el-icon-share"></i> 聚集系数分布</span>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-    <el-row class="mt-10">
-      <el-col :span="12">
-        <el-card>
-          <div slot="header" class="clearfix">
-            <span>
-              <i class="el-icon-share"></i> 网络异质性</span>
-          </div>
-        </el-card>
-      </el-col>
-      <el-col :span="12">
-        <el-card>
-          <div slot="header" class="clearfix">
-            <span>
-              <i class="el-icon-share"></i> 信息传播势</span>
-          </div>
-        </el-card>
-      </el-col>
-    </el-row>
-    <el-row class="mt-10">
-      <el-col :span="12">
-        <el-card>
-          <div slot="header" class="clearfix">
-            <span>
-              <i class="el-icon-share"></i> 社区数量</span>
+            <Chart :dist="networkTopoData.dist.clustering" :title="'聚集系数-度值分布'" :node-style="{color:'#CCCC00',symbol:'circle'}" />
           </div>
         </el-card>
       </el-col>
@@ -105,24 +104,26 @@
 </template>
 <script>
 import IEcharts from 'vue-echarts-v3/src/full.js'
+import Chart from './Chart.vue'
 export default {
   name: 'evolution',
   components: {
-    IEcharts
+    IEcharts,
+    Chart
   },
   data () {
     return {
       networkTopoData: {
         nodes: [
           {
-            id: 1,
-            name: '1'
-          },
-          {
-            id: 2,
-            name: '1'
+            id: 0,
+            name: '0'
           }
-        ]
+        ],
+        dist: {
+          degree: {},
+          gini: {}
+        }
       },
       currentUID: '2c421c30-640b-11e8-8bc4-a4db305b32c3',
       // 演化参数
@@ -141,13 +142,17 @@ export default {
     topoGraphOption: function () {
       return {
         title: {
-          text: '网络拓扑结构',
-          subtext: 'N0=' + this.evoParam.init_graph_size + ' ε=' + this.evoParam.delta_origin + ' k=' + this.evoParam.k
+          text: '网络拓扑',
+          subtext: 'N0=' + this.evoParam.init_graph_size + ' ε=' + this.evoParam.delta_origin + ' k=' + this.evoParam.k,
+          left: 'center'
         },
+        backgroundColor: '#e6e6e8',
         series: [{
           type: 'graph',
           layout: 'force',
           animation: false,
+          roam: true,
+          focusNodeAdjacency: true,
           label: {
             normal: {
               position: 'right',
@@ -164,10 +169,10 @@ export default {
           edges: this.networkTopoData.links,
           edgeSymbol: ['arrow'],
           edgeSymbolSize: 7,
-          symbolSize: 8,
+          symbolSize: 9,
           lineStyle: {
             normal: {
-              color: '#aaa',
+              color: '#777',
               curveness: 0.1
             }
           }
@@ -195,10 +200,18 @@ export default {
         // 如果开始演化 则获取图信息
         vm.$http.get('/api/fetch/' + vm.currentUID)
           .then((rep) => {
-            console.log(rep)
             // 载入图数据
-            if (rep.data && rep.data.nodes && rep.data.links) {
-              vm.networkTopoData = rep.data
+            if (rep.data) {
+              if (rep.data.nodes && rep.data.links) {
+                // 如果有拓扑信息 则载入全部信息
+                vm.networkTopoData.nodes = rep.data.nodes
+                vm.networkTopoData.links = rep.data.links
+              }
+              if (rep.data.dist) {
+                // 否则只载入分布信息
+                vm.networkTopoData.dist = rep.data.dist
+                console.log(rep.data.dist)
+              }
             }
           })
           .catch((e) => {
@@ -207,16 +220,18 @@ export default {
       }
     },
     startEvolution: function () {
+      // 首先停止
+      clearInterval(this.timerHandler)
       let vm = this
-      vm.networkTopoData = { nodes: null, links: null }
+      // vm.networkTopoData = { nodes: null, links: null }
       vm.$http.post('/api/start', vm.filteredEvoParam)
         .then((rep) => {
           // 获取并设置本次演化uid
           console.log(rep)
           vm.currentUID = rep.data
-          // vm.timerHandler = setInterval(function () {
-          //   vm.fetchGraph()
-          // }, 4000)
+          vm.timerHandler = setInterval(function () {
+            vm.fetchGraph()
+          }, 1000)
         })
         .catch((e) => {
           console.log(e)
