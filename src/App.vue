@@ -50,6 +50,8 @@ body {
   .side-menu-container {
     .el-menu {
       border-left: solid 1px #e6e6e6;
+      border-right: none;
+      position: fixed;
       .el-menu-item {
         &:hover,
         &.is-active {

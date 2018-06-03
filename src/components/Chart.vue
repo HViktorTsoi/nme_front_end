@@ -16,6 +16,9 @@ export default {
     nodeStyle: {},
     isGini: {
       default: false
+    },
+    plotType: {
+      default: 'scatter'
     }
   },
   data () {
@@ -56,7 +59,7 @@ export default {
             symbolSize: this.nodeStyle.symbolSize ? this.nodeStyle.symbolSize : 8,
             animation: false,
             large: true,
-            type: 'scatter',
+            type: this.plotType,
             itemStyle: {
               color: this.nodeStyle.color
             },
@@ -75,6 +78,17 @@ export default {
           },
           data: [[0, 0], [1, 1]]
         })
+      }
+      if (this.plotType === 'heatmap') {
+        option.visualMap = {
+          min: 0,
+          max: 3,
+          calculable: true,
+          realtime: false,
+          inRange: {
+            color: ['#313695', '#4575b4', '#74add1', '#abd9e9', '#e0f3f8', '#ffffbf', '#fee090', '#fdae61', '#f46d43', '#d73027', '#a50026']
+          }
+        }
       }
       return option
     }

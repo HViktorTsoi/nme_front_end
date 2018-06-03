@@ -28,6 +28,11 @@
               <el-input min="0" type="number" v-model="evoParam.delta_origin"></el-input>
             </el-form-item>
           </el-form>
+          <el-form :inline="true">
+            <el-form-item label="Inspect时间间隔(ms)">
+              <el-input min="0" type="number" v-model="interval"></el-input>
+            </el-form-item>
+          </el-form>
         </el-row>
         <el-row type="flex" justify="center">
           <el-button type="primary" @click="startEvolution">开始演化过程</el-button>
@@ -81,7 +86,7 @@
         </el-col>
       </el-card>
     </el-row>
-    <el-row class="mt-10">
+    <el-row class="mt-10" :gutter="10">
       <el-col :span="12">
         <el-card>
           <div slot="header" class="clearfix">
@@ -95,10 +100,21 @@
         <el-card>
           <div slot="header" class="clearfix">
             <span>
-              <i class="el-icon-share"></i> 边活跃度</span>
+              <i class="el-icon-share"></i> 信息传播势</span>
+            <el-row>
+              <el-col :span="12">
+                <Chart :dist="networkTopoData.dist.power.in" :title="'入势'" :node-style="{color:'#CCCC00',symbol:'circle'}" />
+              </el-col>
+              <el-col :span="12">
+                <Chart :dist="networkTopoData.dist.power.out" :title="'出势'" :node-style="{color:'#CCCC00',symbol:'circle'}" />
+              </el-col>
+            </el-row>
           </div>
         </el-card>
       </el-col>
+    </el-row>
+    <el-row class="mt-10">
+
     </el-row>
   </div>
 </template>
@@ -122,7 +138,8 @@ export default {
         ],
         dist: {
           degree: {},
-          gini: {}
+          gini: {},
+          power: {}
         }
       },
       currentUID: '2c421c30-640b-11e8-8bc4-a4db305b32c3',
@@ -135,7 +152,8 @@ export default {
         analyse_community: false
       },
       // 计数器句柄
-      timerHandler: null
+      timerHandler: null,
+      interval: 1000
     }
   },
   computed: {
@@ -231,7 +249,7 @@ export default {
           vm.currentUID = rep.data
           vm.timerHandler = setInterval(function () {
             vm.fetchGraph()
-          }, 1000)
+          }, parseInt(vm.interval))
         })
         .catch((e) => {
           console.log(e)
