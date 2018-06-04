@@ -39,7 +39,7 @@ export default {
           left: 'center',
           top: 20,
           textStyle: {
-            color: '#c43235'
+            color: '#555'
           }
         },
         dataZoom: [
