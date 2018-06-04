@@ -79,10 +79,10 @@
           <Chart :dist="networkTopoData.dist.gini.all" :is-gini="true" :title="'综合洛伦兹曲线'" :node-style="{color:'#CC0033',symbol:'circle',symbolSize:5}" />
         </el-col>
         <el-col :span="8">
-          <Chart :dist="networkTopoData.dist.gini.in" :is-gini="true" :title="'入度值-基尼系数'" :node-style="{color:'#333333',symbol:'circle',symbolSize:5}" />
+          <Chart :dist="networkTopoData.dist.gini.in" :is-gini="true" :title="'入度值-洛伦兹曲线'" :node-style="{color:'#333333',symbol:'circle',symbolSize:5}" />
         </el-col>
         <el-col :span="8">
-          <Chart :dist="networkTopoData.dist.gini.out" :is-gini="true" :title="'出度值-基尼系数'" :node-style="{color:'#CCCC00',symbol:'circle',symbolSize:5}" />
+          <Chart :dist="networkTopoData.dist.gini.out" :is-gini="true" :title="'出度值-洛伦兹曲线'" :node-style="{color:'#CCCC00',symbol:'circle',symbolSize:5}" />
         </el-col>
       </el-card>
     </el-row>
@@ -92,7 +92,7 @@
           <div slot="header" class="clearfix">
             <span>
               <i class="el-icon-share"></i> 聚集系数分布</span>
-            <Chart :dist="networkTopoData.dist.clustering" :title="'聚集系数-度值分布'" :node-style="{color:'#CCCC00',symbol:'circle'}" />
+            <Chart :dist="networkTopoData.dist.clustering" :title="'聚集系数-度值'" :node-style="{color:'#CCCC00',symbol:'circle'}" />
           </div>
         </el-card>
       </el-col>
@@ -209,13 +209,14 @@ export default {
     }
   },
   mounted () {
-    this.fetchGraph()
   },
   methods: {
     fetchGraph: function () {
       let vm = this
       if (vm.currentUID) {
         // 如果开始演化 则获取图信息
+        // 设置载入状态
+        // vm.$store.dispatch('setLoadingStatus', true)
         vm.$http.get('/api/fetch/' + vm.currentUID)
           .then((rep) => {
             // 载入图数据
@@ -224,6 +225,8 @@ export default {
                 // 如果有拓扑信息 则载入全部信息
                 vm.networkTopoData.nodes = rep.data.nodes
                 vm.networkTopoData.links = rep.data.links
+                console.table(vm.networkTopoData.nodes)
+                console.table(vm.networkTopoData.links)
               }
               if (rep.data.dist) {
                 // 否则只载入分布信息
@@ -231,6 +234,8 @@ export default {
                 console.log(rep.data.dist)
               }
             }
+            // 取消载入状态
+            // vm.$store.dispatch('setLoadingStatus', false)
           })
           .catch((e) => {
             console.log(e)
@@ -241,6 +246,8 @@ export default {
       // 首先停止
       clearInterval(this.timerHandler)
       let vm = this
+      vm.networkTopoData.nodes = []
+      vm.networkTopoData.links = []
       // vm.networkTopoData = { nodes: null, links: null }
       vm.$http.post('/api/start', vm.filteredEvoParam)
         .then((rep) => {

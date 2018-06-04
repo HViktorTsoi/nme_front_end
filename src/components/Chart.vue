@@ -1,6 +1,6 @@
 <template>
   <el-row class="chart-container">
-    <IEcharts :option="scatterOption" />
+    <IEcharts :loading="$store.state.loading" :option="scatterOption" />
   </el-row>
 </template>
 <script>

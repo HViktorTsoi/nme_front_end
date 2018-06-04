@@ -1,6 +1,5 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
-import Vuex from 'vuex'
 import axios from 'axios'
 
 import ElementUI from 'element-ui'
@@ -12,7 +11,6 @@ import store from './store'
 
 Vue.config.productionTip = false
 
-Vue.use(Vuex)
 Vue.use(VueRouter)
 Vue.use(ElementUI)
 Vue.prototype.$http = axios
