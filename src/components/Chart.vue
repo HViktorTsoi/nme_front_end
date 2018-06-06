@@ -4,7 +4,11 @@
   </el-row>
 </template>
 <script>
-import IEcharts from 'vue-echarts-v3/src/full.js'
+import IEcharts from 'vue-echarts-v3/src/lite.js'
+import 'echarts/lib/chart/scatter'
+import 'echarts/lib/chart/line'
+import 'echarts/lib/component/title'
+import 'echarts/lib/component/dataZoom'
 export default {
   name: 'Chart',
   components: {

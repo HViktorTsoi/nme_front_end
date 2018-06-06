@@ -120,7 +120,9 @@
   </div>
 </template>
 <script>
-import IEcharts from 'vue-echarts-v3/src/full.js'
+import IEcharts from 'vue-echarts-v3/src/lite.js'
+import 'echarts/lib/chart/graph'
+import 'echarts/lib/component/title'
 import Chart from './Chart.vue'
 export default {
   name: 'evolution',
